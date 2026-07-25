@@ -137,10 +137,12 @@ contract DataExchange {
     }
 
     function getDataset(uint256 datasetId) external view returns (Dataset memory) {
+        require(datasetId < datasetCount, "Datset does not exist.");
         return datasets[datasetId];
     }
 
     function getRequest(uint256 datasetId, address buyer) external view returns (AccessRequest memory) {
+        require(datasetId < datasetCount, "Datset does not exist.");
         return requests[datasetId][buyer];
     }
 
