@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Sepolia interface for testing"
+    />
+    <title>IoT Data Exchange</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main>
+      <h1>Smart Contract-Based IoT Data Exchange</h1>
+
+      <p>
+        <button id="connect" type="button">Connect MetaMask</button>
+        <button id="switch" type="button" hidden>Switch to Sepolia</button>
+        <span id="account"></span>
+      </p>
+
+      <p id="message" aria-live="polite">Connect MetaMask to begin.</p>
+
+      <section>
+        <h2>Register dataset</h2>
+        <form id="register-form">
+          <label for="register-file">Dataset file</label>
+          <input id="register-file" type="file" required />
+
+          <label for="uri">Dataset URI</label>
+          <input id="uri" value="datasets/temperature.csv" required />
+
+          <label for="digest">SHA-256 digest</label>
+          <input id="digest" minlength="64" maxlength="64" readonly required />
+
+          <button class="write" type="submit">Register</button>
+        </form>
+      </section>
+
+      <section>
+        <h2>Request access</h2>
+        <form id="request-form">
+          <label for="request-id">Dataset ID</label>
+          <input id="request-id" type="number" min="0" value="0" required />
+
+          <button class="write" type="submit">Request access</button>
+        </form>
+      </section>
+
+      <section>
+        <h2>Approve access</h2>
+        <form id="approval-form">
+          <label for="approval-id">Dataset ID</label>
+          <input id="approval-id" type="number" min="0" value="0" required />
+
+          <label for="approval-buyer">Buyer address</label>
+          <input id="approval-buyer" placeholder="0x..." required />
+
+          <button class="write" type="submit">Approve access</button>
+        </form>
+      </section>
+
+      <section>
+        <h2>Check access</h2>
+        <form id="check-form">
+          <label for="check-id">Dataset ID</label>
+          <input id="check-id" type="number" min="0" value="0" required />
+
+          <label for="check-buyer">Buyer address</label>
+          <input id="check-buyer" placeholder="0x..." required />
+
+          <button type="submit">Check access</button>
+        </form>
+        <p id="access-result" hidden></p>
+      </section>
+
+      <section>
+        <h2>Verify received dataset</h2>
+        <form id="verify-form">
+          <label for="verify-id">Dataset ID</label>
+          <input id="verify-id" type="number" min="0" value="0" required />
+
+          <label for="verify-file">Received dataset file</label>
+          <input id="verify-file" type="file" required />
+
+          <button type="submit">Verify SHA-256</button>
+        </form>
+        <p id="verify-result" hidden></p>
+      </section>
+    </main>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

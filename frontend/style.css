@@ -1,0 +1,90 @@
+:root {
+  font-family: Arial, Helvetica, sans-serif;
+  color: #1d241a;
+  background: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+main {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+h1 {
+  margin: 0 0 1.5rem;
+  font-size: 1.5rem;
+}
+
+h2 {
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+}
+
+section {
+  padding: 1.25rem 0;
+  border-top: 1px solid #c9d3c3;
+}
+
+form {
+  display: grid;
+  gap: 0.5rem;
+  max-width: 460px;
+}
+
+label {
+  font-size: 0.9rem;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+input {
+  padding: 0.45rem;
+  border: 1px solid #8baa7d;
+}
+
+button {
+  width: fit-content;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid #5c7153;
+  background: #5c7153;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid #b9e2a7;
+  outline-offset: 2px;
+}
+
+#account,
+#message,
+#access-result {
+  overflow-wrap: anywhere;
+}
+
+#account {
+  margin-left: 0.5rem;
+}
+
+#access-result,
+#verify-result {
+  color: #5c7153;
+  font-weight: 700;
+}
