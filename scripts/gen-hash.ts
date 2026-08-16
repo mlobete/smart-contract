@@ -4,4 +4,4 @@ const FILE_PATH = "temperature.csv";
 const digest = hashDataset(FILE_PATH);
 
 console.log(`Dataset: ${FILE_PATH}`);
-console.log(`SHA-256: ${digest}`);
+console.log(`SHA-256: 0x${digest}`);

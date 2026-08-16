@@ -2,10 +2,24 @@
 pragma solidity ^0.8.28;
 
 contract DataExchange {
+
+    error EmptyURI();
+    error EmptyDigest();
+    error DatasetDoesNotExist();
+    error OwnerCannotRequestAccess();
+    error AccessAlreadyRequested();
+    error OnlyOwnerCanApprove();
+    error OnlyOwnerCanReject();
+    error RequestDoesNotExist();
+    error RequestNotPending();
+    error OnlyOwnerCanRecordDelivery();
+    error BuyerAccessNotApproved();
+    error DeliveryAlreadyRecorded();
+
     struct Dataset {
         address owner;
         string uri;
-        string digest;
+        bytes32 digest;
     }
 
     enum AccessStatus {
@@ -16,8 +30,8 @@ contract DataExchange {
 
     struct AccessRequest {
         address buyer;
-        uint256 datasetId;
         AccessStatus status;
+        bool delivered;
     }
 
     uint256 private datasetCount;
@@ -25,13 +39,11 @@ contract DataExchange {
     mapping(uint256 => Dataset) private datasets;
     mapping(uint256 => mapping(address => AccessRequest)) private requests;
 
-    mapping(uint256 => mapping(address => bool)) private deliveries;
-
     event DatasetRegistered(
         uint256 indexed datasetId,
         address indexed owner,
         string uri,
-        string digest
+        bytes32 digest
     );
 
     event AccessRequested(
@@ -57,9 +69,10 @@ contract DataExchange {
         address owner
     );
 
-    function registerDataset(string calldata uri, string calldata digest) external {
-        require(bytes(uri).length > 0, "URI cannot be empty.");
-        require(bytes(digest).length > 0, "Digest cannot be empty."); 
+    function registerDataset(string calldata uri, bytes32 digest) external {
+        if (bytes(uri).length == 0) revert EmptyURI();
+        if (digest == bytes32(0)) revert EmptyDigest();
+
         uint256 datasetId = datasetCount;
 
         datasets[datasetId] = Dataset({owner: msg.sender, uri: uri, digest: digest});
@@ -71,25 +84,25 @@ contract DataExchange {
 
     function requestAccess(uint256 datasetId) external {
         // dataset exists
-        require(datasetId < datasetCount, "Dataset does not exist.");
+        if (datasetId >= datasetCount) revert DatasetDoesNotExist();
         // cannot request own
-        require(datasets[datasetId].owner != msg.sender, "Owner cannot request access.");
+        if (datasets[datasetId].owner == msg.sender) revert OwnerCannotRequestAccess();
         // cannot double request
-        require(requests[datasetId][msg.sender].buyer == address(0), "Access already requested.");
+        if (requests[datasetId][msg.sender].buyer != address(0)) revert AccessAlreadyRequested();
         // store and update status
-        requests[datasetId][msg.sender] = AccessRequest({buyer: msg.sender, datasetId: datasetId, status: AccessStatus.Pending});
+        requests[datasetId][msg.sender] = AccessRequest({buyer: msg.sender, status: AccessStatus.Pending, delivered: false});
 
         emit AccessRequested(datasetId, msg.sender);
     }
 
     function approveAccess(uint256 datasetId, address buyer) external {
-        require(datasetId < datasetCount, "Dataset does not exist.");
-        require(datasets[datasetId].owner == msg.sender, "Only owner can approve.");
+        if (datasetId >= datasetCount) revert DatasetDoesNotExist();
+        if (datasets[datasetId].owner != msg.sender) revert OnlyOwnerCanApprove();
 
         AccessRequest storage request = requests[datasetId][buyer];
 
-        require(request.buyer != address(0), "Request does not exist.");
-        require(request.status == AccessStatus.Pending, "Request is not pending.");
+        if (request.buyer == address(0)) revert RequestDoesNotExist();
+        if (request.status != AccessStatus.Pending) revert RequestNotPending();
 
         request.status = AccessStatus.Approved;
 
@@ -97,13 +110,13 @@ contract DataExchange {
     }
 
     function rejectAccess(uint256 datasetId, address buyer) external {
-        require(datasetId < datasetCount, "Dataset does not exist."); 
-        require(datasets[datasetId].owner == msg.sender, "Only owner can reject.");
+        if (datasetId >= datasetCount) revert DatasetDoesNotExist();
+        if (datasets[datasetId].owner != msg.sender) revert OnlyOwnerCanReject();
 
         AccessRequest storage request = requests[datasetId][buyer];
-        
-        require(request.buyer != address(0), "Request does not exist.");
-        require(request.status == AccessStatus.Pending, "Request is not pending.");
+
+        if (request.buyer == address(0)) revert RequestDoesNotExist();
+        if (request.status != AccessStatus.Pending) revert RequestNotPending();
 
         request.status = AccessStatus.Rejected;
 
@@ -115,34 +128,38 @@ contract DataExchange {
     }
 
     function isDelivered(uint256 datasetId, address buyer) external view returns (bool) {
-        return deliveries[datasetId][buyer];
+        return requests[datasetId][buyer].delivered;
     }
 
     function recordDelivery(uint256 datasetId, address buyer) external {
-        require(datasetId < datasetCount, "Dataset does not exist.");
-        require(datasets[datasetId].owner == msg.sender, "Only owner can record delivery.");
+        if (datasetId >= datasetCount) revert DatasetDoesNotExist();
+        if (datasets[datasetId].owner != msg.sender) revert OnlyOwnerCanRecordDelivery();
 
         AccessRequest storage request = requests[datasetId][buyer];
-        require(request.status == AccessStatus.Approved, "Buyer access is not approved.");
 
-        require(!deliveries[datasetId][buyer], "Delivery already recorded.");
-        deliveries[datasetId][buyer] = true;
+        if (request.status != AccessStatus.Approved) revert BuyerAccessNotApproved();
+        if (request.delivered) revert DeliveryAlreadyRecorded();
+
+        request.delivered = true;
 
         emit DeliveryRecorded(datasetId, buyer, msg.sender);
     }
 
-    function verifyDigest(uint256 datasetId, string calldata givenDigest) external view returns (bool) {
-        require(datasetId < datasetCount, "Dataset does not exist.");
-        return keccak256(bytes(datasets[datasetId].digest)) == keccak256(bytes(givenDigest));
+    function verifyDigest(uint256 datasetId, bytes32 givenDigest) external view returns (bool) {
+        if (datasetId >= datasetCount) revert DatasetDoesNotExist();
+
+        return datasets[datasetId].digest == givenDigest;
     }
 
     function getDataset(uint256 datasetId) external view returns (Dataset memory) {
-        require(datasetId < datasetCount, "Datset does not exist.");
+        if (datasetId >= datasetCount) revert DatasetDoesNotExist();
+
         return datasets[datasetId];
     }
 
     function getRequest(uint256 datasetId, address buyer) external view returns (AccessRequest memory) {
-        require(datasetId < datasetCount, "Datset does not exist.");
+        if (datasetId >= datasetCount) revert DatasetDoesNotExist();
+
         return requests[datasetId][buyer];
     }
 

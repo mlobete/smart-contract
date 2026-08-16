@@ -8,7 +8,7 @@ describe("Buyer dataset requests", function () {
     let buyer: any;
     let seller: any;
     const mockMetaDataURI = "/data/metadata/test.json";
-    const mockDigest = "ec864fe99b539704b8872ac591067ef22d836a8d942087f2dba274b301ebe6e5";
+    const mockDigest = "0xec864fe99b539704b8872ac591067ef22d836a8d942087f2dba274b301ebe6e5";
 
     const DATASET_ID = 0n;
     const STATUS_PENDING = 0n;
@@ -31,11 +31,9 @@ describe("Buyer dataset requests", function () {
         expect(request.buyer).to.equal(buyer.address);
     });
 
-    it("stores dataset ID", async function () {
+    it("starts without recorded delivery", async function () {
         await dataExchange.connect(buyer).requestAccess(0);
-        const request = await dataExchange.getRequest(0, buyer.address);
-        // pending = 0, approve = 1, reject = 2
-        expect(request.datasetId).to.equal(DATASET_ID);
+        expect(await dataExchange.isDelivered(0, buyer.address)).to.equal(false);
     });
 
     it("starts pending", async function () {

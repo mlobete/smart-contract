@@ -10,7 +10,7 @@ describe("owner request approval", async function () {
     let other: any;
 
     const mockMetadataURI = "/datasets/metadata/test.json";
-    const mockDigest = "ec864fe99b539704b8872ac591067ef22d836a8d942087f2dba274b301ebe6e5";
+    const mockDigest = "0xec864fe99b539704b8872ac591067ef22d836a8d942087f2dba274b301ebe6e5";
 
     const STATUS_APPROVED = 1n;
 

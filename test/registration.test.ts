@@ -7,7 +7,7 @@ describe("Seller dataset registration", function () {
     let dataExchange: any;
     let seller: any;
     const mockMetadataURI = "/datasets/metadata/test.json";
-    const mockDigest = "ec864fe99b539704b8872ac591067ef22d836a8d942087f2dba274b301ebe6e5";
+    const mockDigest = "0xec864fe99b539704b8872ac591067ef22d836a8d942087f2dba274b301ebe6e5";
 
     beforeEach(async function () {
         dataExchange = await ethers.deployContract("DataExchange");
@@ -47,7 +47,7 @@ describe("Seller dataset registration", function () {
 
     it("increments the dataset id", async function () {
         const mockMetadataURI2 = "/datasets/metadata/test2.json"
-        const mockDigest2 = "b37ed244c19de6a176fffe949d47a78d31998477e2e6d74ab11736e80fe56b74";
+        const mockDigest2 = "0xb37ed244c19de6a176fffe949d47a78d31998477e2e6d74ab11736e80fe56b74";
         await dataExchange.connect(seller).registerDataset(mockMetadataURI, mockDigest);
         await dataExchange.connect(seller).registerDataset(mockMetadataURI2, mockDigest2);
         expect(await dataExchange.getDatasetCount()).to.equal(2n);
@@ -63,7 +63,7 @@ describe("Seller dataset registration", function () {
     });
 
     it("rejects empty digest", async function () {
-        await expect(dataExchange.connect(seller).registerDataset(mockMetadataURI, "")).to.revert(ethers);
+        await expect(dataExchange.connect(seller).registerDataset(mockMetadataURI, ethers.ZeroHash)).to.revert(ethers);
     });
 });
 
