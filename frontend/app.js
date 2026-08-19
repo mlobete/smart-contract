@@ -1,15 +1,16 @@
 import { BrowserProvider, Contract } from "https://cdn.jsdelivr.net/npm/ethers@6.17.0/+esm";
 
+// DEPLOYMENT ADDRESS! Must replace
 const CONTRACT_ADDRESS = "0x87aBE574f7b093a98714F7707c5C7BC952BCf5f4";
 const SEPOLIA_CHAIN_ID = 11155111n;
 const SEPOLIA_HEX = "0xaa36a7";
 
 const ABI = [
-  "function registerDataset(string uri, string digest)",
+  "function registerDataset(string uri, bytes32 digest)",
   "function requestAccess(uint256 datasetId)",
   "function approveAccess(uint256 datasetId, address buyer)",
   "function hasAccess(uint256 datasetId, address buyer) view returns (bool)",
-  "function getDataset(uint256 datasetId) view returns (address owner, string uri, string digest)",
+  "function getDataset(uint256 datasetId) view returns (address owner, string uri, bytes32 digest)",
 ];
 
 const ethereum = window.ethereum;
@@ -37,10 +38,8 @@ async function sha256(file) {
   const bytes = await file.arrayBuffer();
   const hash = await crypto.subtle.digest("SHA-256", bytes);
 
-  return Array.from(
-    new Uint8Array(hash),
-    (byte) => byte.toString(16).padStart(2, "0"),
-  ).join("");
+  return `0x${Array.from(new Uint8Array(hash),
+    (byte) => byte.toString(16).padStart(2, "0")).join("")}`;
 }
 
 function updateButtons() {

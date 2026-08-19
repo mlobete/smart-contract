@@ -39,7 +39,7 @@ console.log(`Contract:  ${await dataExchange.getAddress()}`);
 
 //
 
-const digest = hashDataset(FILE_PATH);
+const digest = `0x${hashDataset(FILE_PATH)}`;
 
 console.log("\n1. off-chain dataset hashed and prepared");
 console.log(`file:      ${FILE_PATH}`);
@@ -74,7 +74,6 @@ const datasetId = 0n;
 const dataset = await dataExchange.getDataset(datasetId);
 
 console.log("\n2. dataset registered on-chain");
-console.log(`dataset id:    ${datasetId}`);
 console.log(`owner:         ${dataset.owner}`);
 console.log(`stored uri:    ${dataset.uri}`);
 console.log(`digest:        ${dataset.digest}`);
@@ -97,7 +96,6 @@ const request = await dataExchange.getRequest(datasetId, buyer.address);
 
 console.log("\n4. buyer requested access");
 console.log(`request asker:     ${request.buyer}`);
-console.log(`dataset id:        ${request.datasetId}`);
 console.log(`request status:    ${request.status}`);
 console.log(`gas used:          ${requestReceipt?.gasUsed}`);
 
@@ -147,7 +145,7 @@ console.log(`gas used:          ${deliveryReceipt?.gasUsed}`);
 
 //
 
-const receivedDigest = hashDataset(deliveredFilePath);
+const receivedDigest = `0x${hashDataset(deliveredFilePath)}`;
 
 const validDataset = await dataExchange.verifyDigest(datasetId, receivedDigest);
 
@@ -162,7 +160,7 @@ copyFileSync(deliveredFilePath, tamperedFilePath);
 // fake data time:temperature
 appendFileSync(tamperedFilePath, "\n1377299999, 99.99");
 
-const tamperedDigest = hashDataset(tamperedFilePath);
+const tamperedDigest = `0x${hashDataset(tamperedFilePath)}`;
 const tamperedDatasetValid = await dataExchange.verifyDigest(datasetId, tamperedDigest);
 
 console.log("\n10. tampered dataset verification");

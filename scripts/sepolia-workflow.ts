@@ -2,12 +2,13 @@ import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { network } from "hardhat";
 
+// DEPLOYMENT ADDRESS! Must replace
 const contractAddress = "0x87aBE574f7b093a98714F7707c5C7BC952BCf5f4";
 const datasetPath = "temperature.csv";
 const datasetUri = "local://temperature.csv";
 
 function calculateDigest(filePath: string): string {
-    return createHash("sha256").update(readFileSync(filePath)).digest("hex");
+    return `0x${createHash("sha256").update(readFileSync(filePath)).digest("hex")}`;
 }
 
 async function sendAndReport(label: string, transactionPromise: Promise<any>) {
@@ -86,7 +87,7 @@ async function main() {
         await dataExchange.verifyDigest(datasetId, digest)
     );
 
-    const tamperedDigest = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+    const tamperedDigest = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 
     console.log(
         "Tampered digest matches:",

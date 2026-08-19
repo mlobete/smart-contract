@@ -32,7 +32,7 @@
           <input id="uri" value="datasets/temperature.csv" required />
 
           <label for="digest">SHA-256 digest</label>
-          <input id="digest" minlength="64" maxlength="64" readonly required />
+          <input id="digest" minlength="66" maxlength="66" pattern="0x[0-9a-fA-F]{64}" readonly required />
 
           <button class="write" type="submit">Register</button>
         </form>
