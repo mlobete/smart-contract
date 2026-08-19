@@ -43,10 +43,22 @@ describe("owner request rejection", async function () {
     });
 
     it("non-owner cannot reject", async function () {
-        await expect(dataExchange.connect(other).approveAccess(0, buyer.address)).to.revert(ethers);
+        await expect(dataExchange.connect(other).rejectAccess(0, buyer.address)).to.revert(ethers);
     });
 
     it("cannot reject nonexistent request", async function () {
-        await expect(dataExchange.connect(seller).approveAccess(0, other.address)).to.revert(ethers);
+        await expect(dataExchange.connect(seller).rejectAccess(0, other.address)).to.revert(ethers);
+    });
+
+    it("cannot reject approved request", async function () {
+        await dataExchange.connect(seller).approveAccess(0, buyer.address);
+        await expect(dataExchange.connect(seller).rejectAccess(0, buyer.address)).to.revert(ethers);
+    });
+
+    it("cannot record delivery twice", async function () {
+        await dataExchange.connect(seller).approveAccess(0, buyer.address);
+        await dataExchange.connect(seller).recordDelivery(0, buyer.address);
+
+        await expect(dataExchange.connect(seller).recordDelivery(0, buyer.address)).to.revert(ethers);
     });
 });
