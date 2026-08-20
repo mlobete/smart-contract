@@ -34,3 +34,6 @@
 deliveries/
 # Logs
 *.log
+
+# Datasets
+evaluation_data/
