@@ -1,7 +1,7 @@
 import { BrowserProvider, Contract } from "https://cdn.jsdelivr.net/npm/ethers@6.17.0/+esm";
 
 // DEPLOYMENT ADDRESS! Must replace
-const CONTRACT_ADDRESS = "0x87aBE574f7b093a98714F7707c5C7BC952BCf5f4";
+const CONTRACT_ADDRESS = "0xB95F1dE8f865749b28c347a5df04e36c7Fa534aa";
 const SEPOLIA_CHAIN_ID = 11155111n;
 const SEPOLIA_HEX = "0xaa36a7";
 
@@ -10,7 +10,7 @@ const ABI = [
   "function requestAccess(uint256 datasetId)",
   "function approveAccess(uint256 datasetId, address buyer)",
   "function hasAccess(uint256 datasetId, address buyer) view returns (bool)",
-  "function getDataset(uint256 datasetId) view returns (address owner, string uri, bytes32 digest)",
+  "function verifyDigest(uint256 datasetId, bytes32 givenDigest) view returns (bool)",
 ];
 
 const ethereum = window.ethereum;
@@ -228,11 +228,17 @@ byId("verify-form").addEventListener("submit", async (event) => {
     show("Calculating SHA-256 digest.");
 
     const calculatedDigest = await sha256(file);
-    const dataset = await (await getContract()).getDataset(BigInt(input("verify-id")));
 
-    result.textContent = calculatedDigest === dataset.digest
-        ? "Integrity check: digest matches the registered dataset."
-        : "Integrity check: digest does not match the registered dataset.";
+
+
+    const valid = await (await getContract()).verifyDigest(
+      BigInt(input("verify-id")),
+      calculatedDigest,
+    );
+
+    result.textContent = valid
+      ? "Integrity check: digest matches the registered dataset."
+      : "Integrity check: digest does not match the registered dataset.";
 
     result.hidden = false;
     show("Integrity check completed.");

@@ -3,9 +3,9 @@ import { createHash } from "node:crypto";
 import { network } from "hardhat";
 
 // DEPLOYMENT ADDRESS! Must replace
-const contractAddress = "0x87aBE574f7b093a98714F7707c5C7BC952BCf5f4";
-const datasetPath = "temperature.csv";
-const datasetUri = "local://temperature.csv";
+const contractAddress = "0xB95F1dE8f865749b28c347a5df04e36c7Fa534aa";
+const datasetPath = "evaluation_data/ciciot2023_sample.csv";
+const datasetUri = "local://ciciot2023_sample.csv";
 
 function calculateDigest(filePath: string): string {
     return `0x${createHash("sha256").update(readFileSync(filePath)).digest("hex")}`;
@@ -22,7 +22,7 @@ const receipt = await transaction.wait();
 const elapsedMs = Date.now() - startedAt;
 
 console.log("Block:", receipt.blockNumber);
-console.log("Gas used:", receipt.gasUsed.toString());
+console.log("Gas used (units):", receipt.gasUsed.toString());
 console.log("Confirmation time (ms):", elapsedMs);
 console.log("Etherscan:", `https://sepolia.etherscan.io/tx/${transaction.hash}`);
 
@@ -44,12 +44,14 @@ async function main() {
 
     const dataExchange = await ethers.getContractAt("DataExchange", contractAddress);
 
+    const datasetId = await dataExchange.getDatasetCount();
+
+    console.log("Dataset ID:", datasetId.toString());
+
     await sendAndReport(
         "1. Register dataset",
         dataExchange.connect(seller).registerDataset(datasetUri, digest)
     );
-
-    const datasetId = 0n;
 
     console.log("\nStored dataset:", await dataExchange.getDataset(datasetId));
 
@@ -93,11 +95,36 @@ async function main() {
         "Tampered digest matches:",
         await dataExchange.verifyDigest(datasetId, tamperedDigest)
     );
+
+    const rejectedDatasetId = await dataExchange.getDatasetCount();
+
+    await sendAndReport(
+        "5. Register dataset for rejection",
+        dataExchange.connect(seller).registerDataset(datasetUri, digest)
+    );
+
+    await sendAndReport(
+        "6. Buyer requests access for rejection",
+        dataExchange.connect(buyer).requestAccess(rejectedDatasetId)
+    );
+
+    await sendAndReport(
+        "7. Seller rejects access",
+        dataExchange.connect(seller).rejectAccess(rejectedDatasetId, buyer.address)
+    );
+
+    console.log(
+        "\nBuyer has access after rejection:",
+        await dataExchange.hasAccess(rejectedDatasetId, buyer.address)
+    );
+
+    console.log(
+        "Rejected request:",
+        await dataExchange.getRequest(rejectedDatasetId, buyer.address)
+    );
 }
 
 main().catch((error) => {
     console.error(error);
     process.exitCode = 1;
 });
-
-

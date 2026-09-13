@@ -3,8 +3,8 @@ import { hashDataset } from "./utils/crypto.js";
 import { copyFileSync, mkdirSync, appendFileSync, rmSync} from "node:fs";
 import { dirname, join } from "node:path";
 
-const FILE_PATH = "temperature.csv";
-const DATASET_URI = "local://temperature.csv";
+const FILE_PATH = "evaluation_data/ciciot2023_sample.csv";
+const DATASET_URI = "local://ciciot2023_sample.csv";
 
 const { ethers } = await network.create();
 const [seller, buyer] = await ethers.getSigners();
@@ -17,12 +17,12 @@ const buyerDeliveryDirectory = join(
 
 const deliveredFilePath = join(
     buyerDeliveryDirectory,
-    "temperature.csv"
+    "ciciot2023_sample.csv"
 );
 
 const tamperedFilePath = join(
     buyerDeliveryDirectory,
-    "temperature-tampered.csv"
+    "ciciot2023_sample-tampered.csv"
 );
 
 rmSync(buyerDeliveryDirectory, {recursive: true, force: true});
@@ -74,10 +74,10 @@ const datasetId = 0n;
 const dataset = await dataExchange.getDataset(datasetId);
 
 console.log("\n2. dataset registered on-chain");
-console.log(`owner:         ${dataset.owner}`);
-console.log(`stored uri:    ${dataset.uri}`);
-console.log(`digest:        ${dataset.digest}`);
-console.log(`gas used:      ${registrationReceipt?.gasUsed}`);
+console.log(`owner:             ${dataset.owner}`);
+console.log(`stored uri:        ${dataset.uri}`);
+console.log(`digest:            ${dataset.digest}`);
+console.log(`gas used (units):  ${registrationReceipt?.gasUsed}`);
 
 //
 
@@ -97,7 +97,7 @@ const request = await dataExchange.getRequest(datasetId, buyer.address);
 console.log("\n4. buyer requested access");
 console.log(`request asker:     ${request.buyer}`);
 console.log(`request status:    ${request.status}`);
-console.log(`gas used:          ${requestReceipt?.gasUsed}`);
+console.log(`gas used (units):  ${requestReceipt?.gasUsed}`);
 
 
 console.log("\n5. unauthorised delivery attempt");
@@ -122,7 +122,7 @@ const accessAfterApproval = await dataExchange.hasAccess(datasetId, buyer.addres
 console.log("\n6. seller approved access");
 console.log(`buyer:             ${buyer.address}`);
 console.log(`access granted:    ${accessAfterApproval}`);
-console.log(`gas used:          ${approvalReceipt?.gasUsed}`);
+console.log(`gas used (units):  ${approvalReceipt?.gasUsed}`);
 
 //
 
@@ -141,7 +141,7 @@ const deliveryRecorded = await dataExchange.isDelivered(datasetId, buyer.address
 
 console.log("\n8. delivery recorded on-chain.");
 console.log(`delivery recorded: ${deliveryRecorded}`);
-console.log(`gas used:          ${deliveryReceipt?.gasUsed}`);
+console.log(`gas used (units):  ${deliveryReceipt?.gasUsed}`);
 
 //
 

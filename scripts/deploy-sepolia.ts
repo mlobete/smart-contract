@@ -17,7 +17,24 @@ console.log("Buyer balance:",
             "Sepolia ETH");
 
 const dataExchange = await ethers.deployContract("DataExchange");
-await dataExchange.waitForDeployment();
+
+const deploymentTx = dataExchange.deploymentTransaction();
+
+if (!deploymentTx) {
+    throw new Error("Deployment transaction was unavailable.");
+}
+
+console.log("Deployment transaction:", deploymentTx.hash);
+
+const submittedAt = Date.now();
+const receipt = await deploymentTx.wait();
+
+if (!receipt) {
+    throw new Error("Deployment receipt was unavailable.");
+}
 
 console.log("Contract address:", await dataExchange.getAddress());
-console.log("Deployment transaction", dataExchange.deploymentTransaction()?.hash);
+console.log("Block:", receipt.blockNumber);
+console.log("Gas used (units):", receipt.gasUsed.toString());
+console.log("Confirmation time (ms):", Date.now() - submittedAt);
+console.log("Etherscan:", `https://sepolia.etherscan.io/tx/${deploymentTx.hash}`);
